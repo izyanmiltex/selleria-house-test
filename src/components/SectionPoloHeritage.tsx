@@ -26,10 +26,24 @@ export const ParallaxCard: React.FC<ParallaxCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [offsetY, setOffsetY] = useState(0);
+  const lastShiftRef = useRef(0);
+  const isIntersectingRef = useRef(false);
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersectingRef.current = entry.isIntersecting;
+      },
+      { rootMargin: '150px' }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
     let ticking = false;
     const handleScroll = () => {
+      if (!isIntersectingRef.current) return;
       if (!ticking) {
         window.requestAnimationFrame(() => {
           if (cardRef.current) {
@@ -38,9 +52,11 @@ export const ParallaxCard: React.FC<ParallaxCardProps> = ({
             if (rect.top < windowHeight + 100 && rect.bottom > -100) {
               const totalScrollDistance = windowHeight + rect.height;
               const currentProgress = (windowHeight - rect.top) / totalScrollDistance;
-              // Parallax shift for uncropped image
-              const shift = (currentProgress - 0.5) * 80;
-              setOffsetY(shift);
+              const shift = Math.round(((currentProgress - 0.5) * 80) * 10) / 10;
+              if (Math.abs(shift - lastShiftRef.current) >= 1.5) {
+                lastShiftRef.current = shift;
+                setOffsetY(shift);
+              }
             }
           }
           ticking = false;
@@ -53,6 +69,7 @@ export const ParallaxCard: React.FC<ParallaxCardProps> = ({
     window.addEventListener('resize', handleScroll, { passive: true });
     handleScroll();
     return () => {
+      observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };

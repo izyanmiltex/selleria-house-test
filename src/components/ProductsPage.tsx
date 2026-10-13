@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CatalogProductDetail } from './ProductDetailPage';
 import { ADDITIONAL_CATALOG_PRODUCTS } from '../data/additionalCatalog';
+import { FadeInSection } from './FadeInSection';
 
 interface ProductsPageProps {
   onSelectProductDetail: (product: CatalogProductDetail) => void;
@@ -675,74 +676,81 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
               item.category === 'bag';
             const sku = item.id.toUpperCase();
             return (
-              <div
+              <FadeInSection
                 key={item.id}
-                onClick={() => onSelectProductDetail(item)}
-                className="bg-neutral-50/70 border border-neutral-200 rounded-2xl overflow-hidden hover:border-[#1E5631] hover:shadow-xl transition-all duration-300 flex flex-col justify-between group cursor-pointer"
+                delay={(idx % 3) * 0.08}
+                distance={20}
+                duration={0.55}
+                className="h-full"
               >
                 <div
-                  className={`relative ${
-                    isLeatherBag
-                      ? 'aspect-[4/5]'
-                      : isLegProtector || isHalter
-                      ? 'aspect-square'
-                      : 'aspect-[4/3]'
-                  } w-full overflow-hidden bg-neutral-900`}
+                  onClick={() => onSelectProductDetail(item)}
+                  className="h-full bg-neutral-50/70 border border-neutral-200 rounded-2xl overflow-hidden hover:border-[#1E5631] hover:shadow-xl transition-all duration-300 flex flex-col justify-between group cursor-pointer"
                 >
-                  <img
-                    loading={idx < 6 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    referrerPolicy="no-referrer"
-                    src={item.image}
-                    onError={(e) => {
-                      if (item.fallbackImage) {
-                        (e.currentTarget as HTMLImageElement).src = item.fallbackImage;
-                      }
-                    }}
-                    alt={item.name}
-                    className={`w-full h-full object-cover filter brightness-[0.94] group-hover:scale-105 transition-transform duration-700 ease-out ${
-                      isLegProtector
-                        ? 'object-bottom sm:object-[center_90%] origin-bottom'
-                        : 'object-center'
-                    }`}
-                    style={isLegProtector ? { objectPosition: 'center 88%' } : undefined}
-                  />
-                  <div className="absolute top-3 left-3 bg-[#1E5631] text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
-                    {item.categoryLabel}
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
-                  <div className="mb-4">
-                    <span className="text-[11px] uppercase font-mono tracking-wider text-neutral-600 block mb-1">
-                      SKU #{sku}
-                    </span>
-                    <h3
-                      className="text-lg font-normal text-black group-hover:text-[#1E5631] transition-colors leading-snug"
-                      style={{
-                        fontFamily: 'LeJeuneDeck-Regular, "Times New Roman", Times, serif',
+                  <div
+                    className={`relative ${
+                      isLeatherBag
+                        ? 'aspect-[4/5]'
+                        : isLegProtector || isHalter
+                        ? 'aspect-square'
+                        : 'aspect-[4/3]'
+                    } w-full overflow-hidden bg-neutral-900`}
+                  >
+                    <img
+                      loading={idx < 6 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      src={item.image}
+                      onError={(e) => {
+                        if (item.fallbackImage) {
+                          (e.currentTarget as HTMLImageElement).src = item.fallbackImage;
+                        }
                       }}
-                    >
-                      {item.name}
-                    </h3>
+                      alt={item.name}
+                      className={`w-full h-full object-cover filter brightness-[0.94] group-hover:scale-105 transition-transform duration-700 ease-out ${
+                        isLegProtector
+                          ? 'object-bottom sm:object-[center_90%] origin-bottom'
+                          : 'object-center'
+                      }`}
+                      style={isLegProtector ? { objectPosition: 'center 88%' } : undefined}
+                    />
+                    <div className="absolute top-3 left-3 bg-[#1E5631] text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
+                      {item.categoryLabel}
+                    </div>
                   </div>
 
-                  {/* Card Action Row: View Details */}
-                  <div className="pt-4 border-t border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectProductDetail(item);
-                      }}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#1E5631] hover:bg-[#164225] text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs cursor-pointer group/btn"
-                    >
-                      <span>View Details</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-white group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                    <div className="mb-4">
+                      <span className="text-[11px] uppercase font-mono tracking-wider text-neutral-600 block mb-1">
+                        SKU #{sku}
+                      </span>
+                      <h3
+                        className="text-lg font-normal text-black group-hover:text-[#1E5631] transition-colors leading-snug"
+                        style={{
+                          fontFamily: 'LeJeuneDeck-Regular, "Times New Roman", Times, serif',
+                        }}
+                      >
+                        {item.name}
+                      </h3>
+                    </div>
+
+                    {/* Card Action Row: View Details */}
+                    <div className="pt-4 border-t border-neutral-200">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectProductDetail(item);
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#1E5631] hover:bg-[#164225] text-white text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-xs cursor-pointer group/btn"
+                      >
+                        <span>View Details</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-white group-hover/btn:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </FadeInSection>
             );
           })}
         </div>

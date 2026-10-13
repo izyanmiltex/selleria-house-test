@@ -12,22 +12,22 @@ export const SelleriaLogo: React.FC<SelleriaLogoProps> = ({
   size = 'md',
 }) => {
   const heightClasses = {
-    sm: 'h-7',
-    md: 'h-9 sm:h-10',
-    lg: 'h-12 sm:h-14',
+    sm: 'h-[95px]',
+    md: 'h-[115px] sm:h-[129px]',
+    lg: 'h-[154px] sm:h-[180px]',
   };
 
   return (
     <div className={`inline-flex items-center select-none ${className}`}>
       <img
-        src="http://aryezmiltex.com/sellerialogo2"
+        src="https://aryezmiltex.com/sellerialogo"
         alt="Selleria House"
         loading="eager"
         decoding="async"
         onError={(e) => {
           const img = e.currentTarget;
-          if (img.src === 'http://aryezmiltex.com/sellerialogo2') {
-            img.src = 'https://aryezmiltex.com/sellerialogo2';
+          if (img.src === 'https://aryezmiltex.com/sellerialogo') {
+            img.src = 'http://aryezmiltex.com/sellerialogo';
           }
         }}
         className={`${heightClasses[size]} w-auto object-contain`}

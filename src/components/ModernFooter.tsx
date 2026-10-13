@@ -108,20 +108,25 @@ export const ModernFooter: React.FC<ModernFooterProps> = ({
           
           {/* Col 1: Selleria House Logo & Social Icons (6 cols) */}
           <div className="md:col-span-6 space-y-4">
-            <div className="flex items-center space-x-3.5">
-              <img
-                src="http://aryezmiltex.com/sellerialogo2"
-                alt="Selleria House"
-                loading="eager"
-                decoding="async"
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  if (img.src === 'http://aryezmiltex.com/sellerialogo2') {
-                    img.src = 'https://aryezmiltex.com/sellerialogo2';
-                  }
-                }}
-                className="h-10 sm:h-12 w-auto object-contain filter brightness-110"
-              />
+            <div className="flex flex-col items-start space-y-2">
+              <div className="flex items-center space-x-3.5">
+                <img
+                  src="https://aryezmiltex.com/sellerialogo"
+                  alt="Selleria House"
+                  loading="eager"
+                  decoding="async"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    if (img.src === 'https://aryezmiltex.com/sellerialogo') {
+                      img.src = 'http://aryezmiltex.com/sellerialogo';
+                    }
+                  }}
+                  className="h-[129px] sm:h-[154px] w-auto object-contain filter brightness-110"
+                />
+              </div>
+              <p className="text-xs sm:text-[13px] font-medium tracking-[0.22em] uppercase text-[#A2D4B1]/90">
+                Global Equestrian Exporter
+              </p>
             </div>
 
             {/* Social Media Icons: Instagram & Facebook */}

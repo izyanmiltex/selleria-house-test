@@ -64,14 +64,14 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`w-full transition-all duration-300 select-none ${
+      className={`w-full transition-all duration-300 select-none border-none ${
         isSolid
-          ? 'bg-white/95 backdrop-blur-md text-black border-b border-neutral-200 shadow-xs'
-          : 'bg-gradient-to-b from-black/80 via-black/30 to-transparent text-white border-b border-transparent'
+          ? 'bg-white/95 backdrop-blur-md text-black'
+          : 'bg-gradient-to-b from-black/80 via-black/30 to-transparent text-white'
       }`}
     >
-      <div className="w-full px-6 sm:px-10 lg:px-12">
-        <div className="flex items-center justify-between h-16 sm:h-[72px]">
+      <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12">
+        <div className="flex items-center justify-between min-h-[96px] sm:min-h-[108px] md:min-h-[118px] py-1.5 sm:py-2">
           
           {/* Left: Selleria House Logo */}
           <div className="flex items-center">
@@ -88,17 +88,17 @@ export const Header: React.FC<HeaderProps> = ({
               className="inline-flex items-center group py-1"
             >
               <img
-                src="http://aryezmiltex.com/sellerialogo2"
+                src="https://aryezmiltex.com/sellerialogo"
                 alt="Selleria House"
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
                   const img = e.currentTarget;
-                  if (img.src === 'http://aryezmiltex.com/sellerialogo2') {
-                    img.src = 'https://aryezmiltex.com/sellerialogo2';
+                  if (img.src === 'https://aryezmiltex.com/sellerialogo') {
+                    img.src = 'http://aryezmiltex.com/sellerialogo';
                   }
                 }}
-                className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90 ${
+                className={`h-[83px] sm:h-[92px] md:h-[103px] w-auto object-contain transition-opacity duration-200 group-hover:opacity-90 ${
                   isSolid ? '' : 'filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]'
                 }`}
               />
@@ -184,10 +184,10 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Menu Drawer */}
       {isMobileMenuOpen && (
         <div
-          className={`md:hidden border-b px-6 py-6 shadow-lg animate-fade-in ${
+          className={`md:hidden border-none px-6 py-6 shadow-lg animate-fade-in ${
             isSolid
-              ? 'bg-white text-black border-neutral-200'
-              : 'bg-black text-white border-neutral-800'
+              ? 'bg-white text-black'
+              : 'bg-black text-white'
           }`}
         >
           <div className="flex flex-col space-y-4 text-center">

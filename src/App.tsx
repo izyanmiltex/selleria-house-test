@@ -15,23 +15,26 @@ import { SectionHaltersAndBridles } from './components/SectionHaltersAndBridles'
 import { SectionManufacturingAndExport } from './components/SectionManufacturingAndExport';
 import { SectionCustomOrderAndInquiry } from './components/SectionCustomOrderAndInquiry';
 import { ModernFooter } from './components/ModernFooter';
-import { ProductsPage } from './components/ProductsPage';
-import { ProductDetailPage, CatalogProductDetail } from './components/ProductDetailPage';
-import { AboutPage } from './components/AboutPage';
-import { ContactPage } from './components/ContactPage';
-import { PrivateLabellingPage } from './components/PrivateLabellingPage';
 import { FadeInSection } from './components/FadeInSection';
+import type { CatalogProductDetail } from './components/ProductDetailPage';
 
-// Interactive Modals & Drawers
-import { ProductModal } from './components/ProductModal';
-import { CartDrawer } from './components/CartDrawer';
-import { WishlistDrawer } from './components/WishlistDrawer';
-import { SearchModal } from './components/SearchModal';
-import { StoreLocatorModal } from './components/StoreLocatorModal';
-import { ConciergeModal } from './components/ConciergeModal';
-import { RegionSelectorModal } from './components/RegionSelectorModal';
-import { ContentGuideModal } from './components/ContentGuideModal';
-import { AuthModal } from './components/AuthModal';
+// Lazy-loaded pages (code-split for maximum initial loading speed)
+const ProductsPage = React.lazy(() => import('./components/ProductsPage').then((m) => ({ default: m.ProductsPage })));
+const ProductDetailPage = React.lazy(() => import('./components/ProductDetailPage').then((m) => ({ default: m.ProductDetailPage })));
+const AboutPage = React.lazy(() => import('./components/AboutPage').then((m) => ({ default: m.AboutPage })));
+const ContactPage = React.lazy(() => import('./components/ContactPage').then((m) => ({ default: m.ContactPage })));
+const PrivateLabellingPage = React.lazy(() => import('./components/PrivateLabellingPage').then((m) => ({ default: m.PrivateLabellingPage })));
+
+// Lazy-loaded interactive modals and drawers
+const ProductModal = React.lazy(() => import('./components/ProductModal').then((m) => ({ default: m.ProductModal })));
+const CartDrawer = React.lazy(() => import('./components/CartDrawer').then((m) => ({ default: m.CartDrawer })));
+const WishlistDrawer = React.lazy(() => import('./components/WishlistDrawer').then((m) => ({ default: m.WishlistDrawer })));
+const SearchModal = React.lazy(() => import('./components/SearchModal').then((m) => ({ default: m.SearchModal })));
+const StoreLocatorModal = React.lazy(() => import('./components/StoreLocatorModal').then((m) => ({ default: m.StoreLocatorModal })));
+const ConciergeModal = React.lazy(() => import('./components/ConciergeModal').then((m) => ({ default: m.ConciergeModal })));
+const RegionSelectorModal = React.lazy(() => import('./components/RegionSelectorModal').then((m) => ({ default: m.RegionSelectorModal })));
+const ContentGuideModal = React.lazy(() => import('./components/ContentGuideModal').then((m) => ({ default: m.ContentGuideModal })));
+const AuthModal = React.lazy(() => import('./components/AuthModal').then((m) => ({ default: m.AuthModal })));
 
 export default function App() {
   // Navigation View: 'home', 'products', 'product-detail', 'about', 'contact', 'private-label'
@@ -79,8 +82,8 @@ export default function App() {
   // Preload top primary images into browser memory cache for maximum loading speed
   useEffect(() => {
     const assetsToPreload = [
-      'http://aryezmiltex.com/sellerialogo2',
-      'https://aryezmiltex.com/sellerialogo2',
+      'https://aryezmiltex.com/sellerialogo',
+      'http://aryezmiltex.com/sellerialogo',
       'https://izyanmiltex.com/bridles.avif',
       'https://izyanmiltex.com/halters.webp',
       'https://izyanmiltex.com/saddlery',
@@ -91,6 +94,20 @@ export default function App() {
       const img = new Image();
       img.src = src;
     });
+  }, []);
+
+  // Prefetch secondary route chunks during idle time for instant transitions
+  useEffect(() => {
+    const prefetchViews = () => {
+      import('./components/ProductsPage');
+      import('./components/AboutPage');
+      import('./components/ContactPage');
+    };
+    if ('requestIdleCallback' in window) {
+      (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(prefetchViews);
+    } else {
+      setTimeout(prefetchViews, 1500);
+    }
   }, []);
 
   // Listen to URL hash for direct links and browser back/forward buttons
@@ -227,18 +244,21 @@ export default function App() {
     }, 150);
   };
 
+  const isTransparentHeader =
+    currentView === 'home' || currentView === 'about' || currentView === 'contact';
+
   return (
     <div className="min-h-screen bg-white text-neutral-900 flex flex-col selection:bg-[#1E5631] selection:text-white">
-      {/* Non-Sticky Navigation Bar: Transparent over hero on home, solid on other pages */}
+      {/* Non-Sticky Navigation Bar: Transparent over hero on home, about, and contact pages */}
       <div
         className={`${
-          currentView === 'home'
+          isTransparentHeader
             ? 'absolute top-0 left-0 right-0 z-50 pointer-events-auto'
             : 'relative top-0 left-0 right-0 z-50 pointer-events-auto w-full'
         }`}
       >
         <Header
-          isScrolled={currentView !== 'home'}
+          isScrolled={!isTransparentHeader}
           onNavigateToHome={handleGoToHome}
           onNavigateToProducts={() => handleGoToProducts('all')}
           onNavigateToAbout={handleGoToAbout}
@@ -248,118 +268,126 @@ export default function App() {
       </div>
 
       <main className="flex-1 w-full bg-white">
-        {currentView === 'product-detail' && selectedDetailProduct ? (
-          /* Full Product Detail Page: Direct Inquiry on WhatsApp, No Pop-up, No Add to Cart */
-          <ProductDetailPage
-            product={selectedDetailProduct}
-            onBack={() => {
-              setCurrentView('products');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        ) : currentView === 'products' ? (
-          /* Products Page: Video banner, Leather Collection heading, filter tags, WhatsApp inquiry */
-          <ProductsPage
-            initialCategory={selectedCategory}
-            onSelectProductDetail={(item) => {
-              setSelectedDetailProduct(item);
-              setCurrentView('product-detail');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onNavigateToContact={handleGoToContact}
-            onNavigateToPrivateLabel={handleGoToPrivateLabel}
-          />
-        ) : currentView === 'about' ? (
-          /* Dedicated About Us Page with Why Choose Us section & Inquiry Banner */
-          <AboutPage
-            onNavigateToProducts={(cat) => handleGoToProducts(cat || 'all')}
-            onNavigateToContact={handleGoToContact}
-            onNavigateToPrivateLabel={handleGoToPrivateLabel}
-          />
-        ) : currentView === 'contact' ? (
-          /* Dedicated Contact Us Page with details, form, and animated map */
-          <ContactPage
-            onNavigateToProducts={() => handleGoToProducts('all')}
-          />
-        ) : currentView === 'private-label' ? (
-          /* Dedicated Private Labelling & OEM Page with Quality Control & Customization */
-          <PrivateLabellingPage
-            onNavigateToProducts={() => handleGoToProducts('all')}
-            onNavigateToContact={handleGoToContact}
-          />
-        ) : (
-          /* Home View */
-          <>
-            {/* 1. Hero Section: Equestrian Equipments, video, black & white */}
-            <HeroLakeSection
-              onExplore={() => handleGoToProducts('all')}
+        <React.Suspense
+          fallback={
+            <div className="min-h-[50vh] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full border-2 border-[#1E5631] border-t-transparent animate-spin" />
+            </div>
+          }
+        >
+          {currentView === 'product-detail' && selectedDetailProduct ? (
+            /* Full Product Detail Page: Direct Inquiry on WhatsApp, No Pop-up, No Add to Cart */
+            <ProductDetailPage
+              product={selectedDetailProduct}
+              onBack={() => {
+                setCurrentView('products');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             />
-
-            {/* 2. 5 Categories: Bridles, Halters, Saddlery, Saddle Pads, Riding Wear */}
-            <FadeInSection>
-              <SectionPoloHeritage
-                onSelectCategory={handleSelectCategory}
-                onShopMen={() => handleSelectCategory('accessories')}
-                onShopWomen={() => handleSelectCategory('women')}
+          ) : currentView === 'products' ? (
+            /* Products Page: Video banner, Leather Collection heading, filter tags, WhatsApp inquiry */
+            <ProductsPage
+              initialCategory={selectedCategory}
+              onSelectProductDetail={(item) => {
+                setSelectedDetailProduct(item);
+                setCurrentView('product-detail');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onNavigateToContact={handleGoToContact}
+              onNavigateToPrivateLabel={handleGoToPrivateLabel}
+            />
+          ) : currentView === 'about' ? (
+            /* Dedicated About Us Page with Why Choose Us section & Inquiry Banner */
+            <AboutPage
+              onNavigateToProducts={(cat) => handleGoToProducts(cat || 'all')}
+              onNavigateToContact={handleGoToContact}
+              onNavigateToPrivateLabel={handleGoToPrivateLabel}
+            />
+          ) : currentView === 'contact' ? (
+            /* Dedicated Contact Us Page with details, form, and animated map */
+            <ContactPage
+              onNavigateToProducts={() => handleGoToProducts('all')}
+            />
+          ) : currentView === 'private-label' ? (
+            /* Dedicated Private Labelling & OEM Page with Quality Control & Customization */
+            <PrivateLabellingPage
+              onNavigateToProducts={() => handleGoToProducts('all')}
+              onNavigateToContact={handleGoToContact}
+            />
+          ) : (
+            /* Home View */
+            <>
+              {/* 1. Hero Section: Equestrian Equipments, video, black & white */}
+              <HeroLakeSection
+                onExplore={() => handleGoToProducts('all')}
               />
-            </FadeInSection>
 
-            {/* 3. About Selleria House: Left column narrative & Why Choose Us, Right column image */}
-            <FadeInSection>
-              <SectionAboutLeathercraft
-                onExploreFactory={() => handleGoToProducts('all')}
-                onRequestSamples={handleGoToContact}
-                onViewProducts={() => handleGoToProducts('all')}
-              />
-            </FadeInSection>
+              {/* 2. 5 Categories: Bridles, Halters, Saddlery, Saddle Pads, Riding Wear */}
+              <FadeInSection>
+                <SectionPoloHeritage
+                  onSelectCategory={handleSelectCategory}
+                  onShopMen={() => handleSelectCategory('accessories')}
+                  onShopWomen={() => handleSelectCategory('women')}
+                />
+              </FadeInSection>
 
-            {/* 4. Bestselling Saddles (Infinite Carousel) */}
-            <FadeInSection>
-              <SectionHorseRiding
-                onCardClick={handleSelectCategory}
-                onSelectProduct={(item) => {
-                  setSelectedDetailProduct(item);
-                  setCurrentView('product-detail');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            </FadeInSection>
+              {/* 3. About Selleria House: Left column narrative & Why Choose Us, Right column image */}
+              <FadeInSection>
+                <SectionAboutLeathercraft
+                  onExploreFactory={() => handleGoToProducts('all')}
+                  onRequestSamples={handleGoToContact}
+                  onViewProducts={() => handleGoToProducts('all')}
+                />
+              </FadeInSection>
 
-            {/* 5. Best Selling Belts (Infinite Carousel) */}
-            <FadeInSection>
-              <SectionGarments
-                onCardClick={handleSelectCategory}
-                onSelectProduct={(item) => {
-                  setSelectedDetailProduct(item);
-                  setCurrentView('product-detail');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            </FadeInSection>
+              {/* 4. Bestselling Saddles (Infinite Carousel) */}
+              <FadeInSection>
+                <SectionHorseRiding
+                  onCardClick={handleSelectCategory}
+                  onSelectProduct={(item) => {
+                    setSelectedDetailProduct(item);
+                    setCurrentView('product-detail');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </FadeInSection>
 
-            {/* 6. Bestselling Halters and Bridles (Infinite Carousel) */}
-            <FadeInSection>
-              <SectionHaltersAndBridles
-                onCardClick={handleSelectCategory}
-                onSelectProduct={(item) => {
-                  setSelectedDetailProduct(item);
-                  setCurrentView('product-detail');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            </FadeInSection>
+              {/* 5. Best Selling Belts (Infinite Carousel) */}
+              <FadeInSection>
+                <SectionGarments
+                  onCardClick={handleSelectCategory}
+                  onSelectProduct={(item) => {
+                    setSelectedDetailProduct(item);
+                    setCurrentView('product-detail');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </FadeInSection>
 
-            {/* 7. Export Partners Map: Interactive animation */}
-            <FadeInSection>
-              <SectionManufacturingAndExport />
-            </FadeInSection>
+              {/* 6. Bestselling Halters and Bridles (Infinite Carousel) */}
+              <FadeInSection>
+                <SectionHaltersAndBridles
+                  onCardClick={handleSelectCategory}
+                  onSelectProduct={(item) => {
+                    setSelectedDetailProduct(item);
+                    setCurrentView('product-detail');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </FadeInSection>
 
-            {/* 7. Private Labelling: Materials, Colors, Branding, Packaging */}
-            <FadeInSection>
-              <SectionCustomOrderAndInquiry onOpenConcierge={handleGoToPrivateLabel} />
-            </FadeInSection>
-          </>
-        )}
+              {/* 7. Export Partners Map: Interactive animation */}
+              <FadeInSection>
+                <SectionManufacturingAndExport />
+              </FadeInSection>
+
+              {/* 7. Private Labelling: Materials, Colors, Branding, Packaging */}
+              <FadeInSection>
+                <SectionCustomOrderAndInquiry onOpenConcierge={handleGoToPrivateLabel} />
+              </FadeInSection>
+            </>
+          )}
+        </React.Suspense>
       </main>
 
       {/* Modern Luxury Footer: Black, white & forest green #1E5631, Selleria House */}
@@ -374,75 +402,95 @@ export default function App() {
         />
       </FadeInSection>
 
-      {/* Interactive Modals & Drawers */}
-      <ProductModal
-        product={modalProduct}
-        currency={currency}
-        isWishlisted={modalProduct ? wishlistIds.includes(modalProduct.id) : false}
-        onClose={() => setModalProduct(null)}
-        onToggleWishlist={handleToggleWishlist}
-        onAddToCart={handleAddToCart}
-      />
+      {/* Interactive Modals & Drawers - Loaded only when requested to preserve speed */}
+      <React.Suspense fallback={null}>
+        {modalProduct && (
+          <ProductModal
+            product={modalProduct}
+            currency={currency}
+            isWishlisted={wishlistIds.includes(modalProduct.id)}
+            onClose={() => setModalProduct(null)}
+            onToggleWishlist={handleToggleWishlist}
+            onAddToCart={handleAddToCart}
+          />
+        )}
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        items={cart}
-        currency={currency}
-        onClose={() => setIsCartOpen(false)}
-        onUpdateQty={handleUpdateCartQty}
-        onRemoveItem={handleRemoveCartItem}
-        onClearCart={handleClearCart}
-      />
+        {isCartOpen && (
+          <CartDrawer
+            isOpen={isCartOpen}
+            items={cart}
+            currency={currency}
+            onClose={() => setIsCartOpen(false)}
+            onUpdateQty={handleUpdateCartQty}
+            onRemoveItem={handleRemoveCartItem}
+            onClearCart={handleClearCart}
+          />
+        )}
 
-      <WishlistDrawer
-        isOpen={isWishlistOpen}
-        wishlistProducts={wishlistProducts}
-        currency={currency}
-        onClose={() => setIsWishlistOpen(false)}
-        onRemove={handleToggleWishlist}
-        onMoveToBag={handleMoveWishlistToBag}
-      />
+        {isWishlistOpen && (
+          <WishlistDrawer
+            isOpen={isWishlistOpen}
+            wishlistProducts={wishlistProducts}
+            currency={currency}
+            onClose={() => setIsWishlistOpen(false)}
+            onRemove={handleToggleWishlist}
+            onMoveToBag={handleMoveWishlistToBag}
+          />
+        )}
 
-      <SearchModal
-        isOpen={isSearchOpen}
-        products={PRODUCTS}
-        currency={currency}
-        onClose={() => setIsSearchOpen(false)}
-        onSelectProduct={(p) => setModalProduct(p)}
-      />
+        {isSearchOpen && (
+          <SearchModal
+            isOpen={isSearchOpen}
+            products={PRODUCTS}
+            currency={currency}
+            onClose={() => setIsSearchOpen(false)}
+            onSelectProduct={(p) => setModalProduct(p)}
+          />
+        )}
 
-      <StoreLocatorModal
-        isOpen={isStoreLocatorOpen}
-        onClose={() => setIsStoreLocatorOpen(false)}
-        onBookStyling={(storeName) => {
-          setConciergeStore(storeName);
-          setIsConciergeOpen(true);
-        }}
-      />
+        {isStoreLocatorOpen && (
+          <StoreLocatorModal
+            isOpen={isStoreLocatorOpen}
+            onClose={() => setIsStoreLocatorOpen(false)}
+            onBookStyling={(storeName) => {
+              setConciergeStore(storeName);
+              setIsConciergeOpen(true);
+            }}
+          />
+        )}
 
-      <ConciergeModal
-        isOpen={isConciergeOpen}
-        preselectedStore={conciergeStore}
-        onClose={() => setIsConciergeOpen(false)}
-      />
+        {isConciergeOpen && (
+          <ConciergeModal
+            isOpen={isConciergeOpen}
+            preselectedStore={conciergeStore}
+            onClose={() => setIsConciergeOpen(false)}
+          />
+        )}
 
-      <RegionSelectorModal
-        isOpen={isRegionOpen}
-        currentCurrency={currency}
-        onClose={() => setIsRegionOpen(false)}
-        onSelectCurrency={(c) => setCurrency(c)}
-      />
+        {isRegionOpen && (
+          <RegionSelectorModal
+            isOpen={isRegionOpen}
+            currentCurrency={currency}
+            onClose={() => setIsRegionOpen(false)}
+            onSelectCurrency={(c) => setCurrency(c)}
+          />
+        )}
 
-      <ContentGuideModal
-        isOpen={isContentGuideOpen}
-        onClose={() => setIsContentGuideOpen(false)}
-      />
+        {isContentGuideOpen && (
+          <ContentGuideModal
+            isOpen={isContentGuideOpen}
+            onClose={() => setIsContentGuideOpen(false)}
+          />
+        )}
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={() => {}}
-      />
+        {isAuthOpen && (
+          <AuthModal
+            isOpen={isAuthOpen}
+            onClose={() => setIsAuthOpen(false)}
+            onLoginSuccess={() => {}}
+          />
+        )}
+      </React.Suspense>
     </div>
   );
 }

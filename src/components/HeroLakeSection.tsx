@@ -46,6 +46,7 @@ export const HeroLakeSection: React.FC<HeroLakeSectionProps> = ({
           loop
           muted
           playsInline
+          preload="metadata"
           onLoadedMetadata={handleApplyPlaybackRate}
           onPlay={handleApplyPlaybackRate}
           poster="/assets/equestrian-saddle.jpg"

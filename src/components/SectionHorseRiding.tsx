@@ -69,28 +69,43 @@ export const SectionHorseRiding: React.FC<SectionHorseRidingProps> = ({ onCardCl
     },
   ];
 
-  // 5 sets of cards for completely seamless infinite loop
-  const cards = [...baseCards, ...baseCards, ...baseCards, ...baseCards, ...baseCards];
+  // 3 sets of cards for completely seamless infinite loop with high rendering efficiency
+  const cards = [...baseCards, ...baseCards, ...baseCards];
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Continuous slide towards the right - always in motion by default
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { rootMargin: '100px' }
+    );
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  // Continuous slide towards the right - only active when visible
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || !isVisible) return;
 
-    const singleSetWidth = el.scrollWidth / 5;
+    const singleSetWidth = el.scrollWidth / 3;
     if (el.scrollLeft === 0 && singleSetWidth > 0) {
-      el.scrollLeft = singleSetWidth * 2;
+      el.scrollLeft = singleSetWidth;
     }
 
     let animationFrameId: number;
 
     const step = () => {
-      if (!isDragging && el) {
-        // Sliding towards the right - always in continuous motion
+      if (!isDragging && !isHovered && el) {
+        // Sliding towards the right - gentle smooth motion
         el.scrollLeft -= 0.8;
 
-        const setWidth = el.scrollWidth / 5;
-        if (setWidth > 0 && el.scrollLeft <= setWidth) {
+        const setWidth = el.scrollWidth / 3;
+        if (setWidth > 0 && el.scrollLeft <= 5) {
           el.scrollLeft += setWidth;
         }
       }
@@ -99,17 +114,17 @@ export const SectionHorseRiding: React.FC<SectionHorseRidingProps> = ({ onCardCl
 
     animationFrameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isDragging]);
+  }, [isDragging, isVisible, isHovered]);
 
   const handleScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
-    const setWidth = el.scrollWidth / 5;
+    const setWidth = el.scrollWidth / 3;
     if (setWidth <= 0) return;
 
-    if (el.scrollLeft >= setWidth * 3.5) {
+    if (el.scrollLeft >= setWidth * 2) {
       el.scrollLeft -= setWidth;
-    } else if (el.scrollLeft <= setWidth * 0.5) {
+    } else if (el.scrollLeft <= 5) {
       el.scrollLeft += setWidth;
     }
   };
@@ -149,6 +164,7 @@ export const SectionHorseRiding: React.FC<SectionHorseRidingProps> = ({ onCardCl
   return (
     <section
       id="equestrian-products-section"
+      ref={containerRef}
       className="w-full bg-white pt-10 sm:pt-14 pb-14 sm:pb-20 border-t border-neutral-200 overflow-hidden relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
